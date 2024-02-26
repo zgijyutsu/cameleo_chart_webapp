@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "cameleo-chart-webapp"
+version = "0.1.0"
+description = ""
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+packages = [{include = "cameleo_chart_webapp"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+requests = "^2.31.0"
+PyYAML = "^6.0.1"
+python-dateutil = "^2.8.2"
+streamlit = "^1.31.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
