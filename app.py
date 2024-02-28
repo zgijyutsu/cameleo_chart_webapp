@@ -142,6 +142,7 @@ if st.sidebar.button("データを更新する"):
             df.sort_values(by="date", inplace=True)
             st.success("データを更新しました。")
         else:
+            st.success("データ0件取得")
             # 失敗時はデフォルトデータを表示
             df = pd.DataFrame(data_list)
             df["date"] = pd.to_datetime(df["date"])
