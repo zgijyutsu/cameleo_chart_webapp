@@ -132,7 +132,7 @@ def update_data():
 # データの更新ボタン
 if st.sidebar.button("データを更新する"):
     new_data = update_data()
-    new_data_list = new_data["'event_info'"])
+    new_data_list = new_data["'event_info'"]
     print("newdata", new_data)
     if new_data is not None:
         if new_data_list:
@@ -146,7 +146,7 @@ if st.sidebar.button("データを更新する"):
             df = pd.DataFrame(data_list)
             df["date"] = pd.to_datetime(df["date"])
             df.sort_values(by="date", inplace=True)
-            st.success("デフォルトデータを表示しました。")   
+            st.success("デフォルトデータを表示しました。")
     else:
         # 失敗時はデフォルトデータを表示
         df = pd.DataFrame(data_list)
