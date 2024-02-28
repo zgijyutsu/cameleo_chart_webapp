@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-
+import json
 import requests
 
 # サンプルのリスト
@@ -58,56 +58,14 @@ data_list = [
     },
 ]
 
-# DataFrameの作成
-df = pd.DataFrame(data_list)
+# # DataFrameの作成
+# df = pd.DataFrame(data_list)
 
-# 日付をdatetime型に変換
-df["date"] = pd.to_datetime(df["date"])
+# # 日付をdatetime型に変換
+# df["date"] = pd.to_datetime(df["date"])
 
-# 日付でソート
-df.sort_values(by="date", inplace=True)
-
-# カテゴリを選択してチャートに表示をする項目を変更するチェックボックス
-selected_categories = st.sidebar.multiselect(
-    "表示するカテゴリを選択してください", df["category"].unique()
-)
-
-# カメラを選択してチャートに表示をする項目を変更するチェックボックス
-selected_cameras = st.sidebar.multiselect(
-    "表示するカメラを選択してください", df["camera_name"].unique()
-)
-
-
-# 特定のカメラ名を入力する入力ボックス
-specific_camera_name = st.sidebar.text_input("特定のカメラ名を入力してください")
-
-# "特定のカメラ名を入力する入力ボックス"に入力された値でフィルターされたデータを一覧表示するチャート
-if specific_camera_name:
-    filtered_df = df[df["camera_name"] == specific_camera_name]
-    st.subheader(f"{specific_camera_name} のデータ")
-    st.write(filtered_df)
-
-# 選択されたカテゴリとカメラでデータをフィルタリング
-filtered_df = df[
-    (df["category"].isin(selected_categories))
-    & (df["camera_name"].isin(selected_cameras))
-]
-
-# カメラ名ごとの件数を数える
-camera_name_counts = filtered_df["camera_name"].value_counts()
-# categoryごとの件数を数える
-category_counts = filtered_df["category"].value_counts()
-
-# Streamlitアプリ
-st.title("Cameleo メタデータ取得")
-
-# カメラ名ごとの棒グラフ
-st.subheader("カメラ名ごとの件数")
-st.bar_chart(camera_name_counts)
-
-# カテゴリごとの棒グラフ
-st.subheader("カテゴリごとの件数")
-st.bar_chart(category_counts)
+# # 日付でソート
+# df.sort_values(by="date", inplace=True)
 
 
 # 関数: データを更新する
@@ -131,29 +89,164 @@ def update_data():
 
 # データの更新ボタン
 if st.sidebar.button("データを更新する"):
+
     new_data = update_data()
-    print("newdata", new_data)
+    # print("newdata", new_data)
+    # print("newdata_type", type(new_data))
     if new_data is not None:
         new_data_list = new_data["event_info"]
+        # print("new_data_list", new_data_list)
         if new_data_list:
-            st.success("データを取得しました")
+            # st.success("データを取得しました")
+
             df = pd.DataFrame(new_data_list)
+            # meta_dataカラムの文字列を辞書に変換し、新しいカラムに追加
+            df["meta_data"] = df["meta_data"].apply(
+                lambda x: json.loads(x.replace("'", '"'))
+            )
+
+            # df = df["meta_data"]
+
+            # 新しいカラムをDataFrameに展開
+            meta_data_keys = [
+                "uuid",
+                "date",
+                "camera_name",
+                "category",
+                "camera_id",
+                "timezone",
+                "label[]",
+                "object_probability[]",
+                "height[]",
+                "width[]",
+                "x[]",
+                "y[]",
+            ]
+            for key in meta_data_keys:
+                df[key] = df["meta_data"].apply(lambda x: x.get(key))
+
+            # 不要になったmeta_dataカラムを削除
+            df.drop(columns=["meta_data"], inplace=True)
+
+            # print("df", df)
             df["date"] = pd.to_datetime(df["date"])
             df.sort_values(by="date", inplace=True)
-            st.success("データを更新しました。")
+
+            # st.success("データを更新しました。")
         else:
             st.success("データ0件取得")
             # 失敗時はデフォルトデータを表示
             df = pd.DataFrame(data_list)
             df["date"] = pd.to_datetime(df["date"])
             df.sort_values(by="date", inplace=True)
-            st.success("デフォルトデータを表示しました。")
+            # st.success("デフォルトデータを表示しました。")
     else:
         # 失敗時はデフォルトデータを表示
         df = pd.DataFrame(data_list)
         df["date"] = pd.to_datetime(df["date"])
         df.sort_values(by="date", inplace=True)
+        # st.success("デフォルトデータを表示しました。")
+
+new_data = update_data()
+# print("newdata", new_data)
+# print("newdata_type", type(new_data))
+if new_data is not None:
+    new_data_list = new_data["event_info"]
+    # print("new_data_list", new_data_list)
+    if new_data_list:
+        # st.success("データを取得しました")
+
+        df = pd.DataFrame(new_data_list)
+        # meta_dataカラムの文字列を辞書に変換し、新しいカラムに追加
+        df["meta_data"] = df["meta_data"].apply(
+            lambda x: json.loads(x.replace("'", '"'))
+        )
+
+        # df = df["meta_data"]
+
+        # 新しいカラムをDataFrameに展開
+        meta_data_keys = [
+            "uuid",
+            "date",
+            "camera_name",
+            "category",
+            "camera_id",
+            "timezone",
+            "label[]",
+            "object_probability[]",
+            "height[]",
+            "width[]",
+            "x[]",
+            "y[]",
+        ]
+        for key in meta_data_keys:
+            df[key] = df["meta_data"].apply(lambda x: x.get(key))
+
+        # 不要になったmeta_dataカラムを削除
+        df.drop(columns=["meta_data"], inplace=True)
+
+        # print("df", df)
+        df["date"] = pd.to_datetime(df["date"])
+        df.sort_values(by="date", inplace=True)
+
+        # st.success("データを更新しました。")
+    else:
+        st.success("データ0件取得")
+        # 失敗時はデフォルトデータを表示
+        df = pd.DataFrame(data_list)
+        df["date"] = pd.to_datetime(df["date"])
+        df.sort_values(by="date", inplace=True)
         st.success("デフォルトデータを表示しました。")
+else:
+    # 失敗時はデフォルトデータを表示
+    df = pd.DataFrame(data_list)
+    df["date"] = pd.to_datetime(df["date"])
+    df.sort_values(by="date", inplace=True)
+    st.success("デフォルトデータを表示しました。")
+
+
+# カテゴリを選択してチャートに表示をする項目を変更するチェックボックス
+selected_categories = st.sidebar.multiselect(
+    "表示するカテゴリを選択してください", df["label[]"].unique()
+)
+
+# カメラを選択してチャートに表示をする項目を変更するチェックボックス
+selected_cameras = st.sidebar.multiselect(
+    "表示するカメラを選択してください", df["camera_name"].unique()
+)
+
+
+# 特定のカメラ名を入力する入力ボックス
+specific_camera_name = st.sidebar.text_input("特定のカメラ名を入力してください")
+
+# "特定のカメラ名を入力する入力ボックス"に入力された値でフィルターされたデータを一覧表示するチャート
+if specific_camera_name:
+    filtered_df = df[df["camera_name"] == specific_camera_name]
+    st.subheader(f"{specific_camera_name} のデータ")
+    st.write(filtered_df)
+
+# 選択されたカテゴリとカメラでデータをフィルタリング
+filtered_df = df[
+    (df["label[]"].isin(selected_categories))
+    & (df["camera_name"].isin(selected_cameras))
+]
+
+# カメラ名ごとの件数を数える
+camera_name_counts = filtered_df["camera_name"].value_counts()
+# categoryごとの件数を数える
+category_counts = filtered_df["label[]"].value_counts()
+
+# Streamlitアプリ
+st.title("Cameleo メタデータ取得")
+
+# カメラ名ごとの棒グラフ
+st.subheader("カメラ名ごとの件数")
+st.bar_chart(camera_name_counts)
+
+# カテゴリごとの棒グラフ
+st.subheader("カテゴリごとの件数")
+st.bar_chart(category_counts)
+
 
 # 更新後のデータを表示
 st.write(df)
