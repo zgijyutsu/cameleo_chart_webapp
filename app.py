@@ -115,7 +115,7 @@ def update_data():
     try:
         # リクエストを送信してデータを取得
         response = requests.get(
-            "https://a86c-2001-268-d6b0-ef06-4dde-b0c5-21d4-4abc.ngrok-free.app/get_1hour_metadata"
+            "https://cd1a-2001-268-d6b0-ef06-4dde-b0c5-21d4-4abc.ngrok-free.app/get_1hour_metadata"
         )
         if response.status_code == 200:
             return response.json()
