@@ -134,7 +134,7 @@ if st.sidebar.button("データを更新する"):
     new_data = update_data()
     print("newdata", new_data)
     if new_data is not None:
-        new_data_list = new_data["'event_info'"]
+        new_data_list = new_data["event_info"]
         if new_data_list:
             st.success("データを取得しました")
             df = pd.DataFrame(new_data_list)
